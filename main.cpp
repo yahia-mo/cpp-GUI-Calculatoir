@@ -4,7 +4,8 @@
 class Calculator : public wxFrame {
 public:
     Calculator() : wxFrame(NULL, wxID_ANY, "Simple Calculator",
-                           wxDefaultPosition, wxSize(300,400)) {
+                           wxDefaultPosition, wxSize(300,400)) 
+    {
         wxPanel* panel = new wxPanel(this);
 
         display = new wxTextCtrl(panel, wxID_ANY, "",
@@ -64,7 +65,22 @@ private:
 
             }
         
-        } else {
+        }
+        else if(value == "+" || value == "-" || value == "*" || value == "/")
+        {
+            wxString text = display->GetValue();
+
+            if (text.IsEmpty()) return;
+
+            wxChar last = text.Last();
+
+            if (last == '+' || last == '-' || last == '*' || last == '/')
+                return;
+
+            display->AppendText(value);
+        }
+         else
+        {
             display->AppendText(value);
         }
     }
@@ -77,7 +93,8 @@ private:
         std::vector<wxChar> operators;
         wxString currentNumber = "";
 
-        for (size_t i = 0; i < expr.length(); i++) {
+        for (size_t i = 0; i < expr.length(); i++)
+        {
             wxChar c = expr[i];
             
             if (wxIsdigit(c) || c == '.') 
@@ -90,16 +107,15 @@ private:
                 {
                     double num;
                     currentNumber.ToDouble(&num);
-                    numbers.push_back(num); 
+                    numbers.push_back(num);
                     // new line here .
-                    operators.push_back(c);     
-                    currentNumber = "";     
+                    
                 }
-                   
+                operators.push_back(c);     
+                currentNumber = "";      
             }
         }
-        
-       
+    
         if (!currentNumber.IsEmpty())
         {
             double num;
@@ -108,36 +124,61 @@ private:
         }
 
         if (numbers.empty()) return;
-
-        double result = numbers[0]; 
         
+        // check if there is an extra operation
+        
+        if (numbers.size() <= operators.size())
+        {
+            operators.pop_back();
+        }
+        
+        // Priority for multiply and divide 
+        for (size_t i = 0; i < operators.size(); )
+        {
+            if (operators[i]=='*' || operators[i]=='/')
+            {
+                double a = numbers[i];
+                double b = numbers[i+1];
+
+                if (operators[i]=='/' && b==0)
+                {
+                    display->SetValue("Error");
+                    return;
+                }
+
+                double res = (operators[i]=='*') ? (a*b) : (a/b);
+
+                numbers.erase(numbers.begin()+i);
+                numbers.erase(numbers.begin()+i);
+
+                numbers.insert(numbers.begin()+i, res);
+                operators.erase(operators.begin()+i);
+            }
+            else i++;
+        }
+
+        
+        double final_result = numbers[0]; 
+    
         for (size_t i = 0; i < operators.size(); i++)
         {
-            if (i + 1 >= numbers.size()) break; 
+            // if (i + 1 >= numbers.size()) break; 
             
             wxChar op = operators[i];
             double nextNum = numbers[i+1];
 
-            if (op == '+') result += nextNum;
-            else if (op == '-') result -= nextNum;
-            else if (op == '*') result *= nextNum;
-            else if (op == '/') {
-                if (nextNum != 0) {
-                    result /= nextNum;
-                } else {
-                    display->SetValue("Error");
-                    return;
-                }
-            }
+            if (op == '+') final_result += nextNum;
+            else if (op == '-') final_result -= nextNum;
+        
         }
-        if (int (result) == result)
+
+        if (int (final_result) == final_result)
         {
-            display->SetValue(wxString::Format("%d", (int)result));
+            display->SetValue(wxString::Format("%d", (int)final_result));
+        }else
+        {
+        display->SetValue(wxString::Format("%.2f", final_result));
         }
-        else
-       {
-        display->SetValue(wxString::Format("%.2f", result));
-       }
     }
 };
 
