@@ -10,7 +10,8 @@ public:
         display = new wxTextCtrl(panel, wxID_ANY, "",
                                  wxPoint(10,10), wxSize(260,40),
                                  wxTE_RIGHT);
-
+        wxButton* topBottom = new wxButton(panel, 1100, "Delete");
+        Bind(wxEVT_BUTTON, &Calculator::OnButtonClicked, this, 1100);
         wxGridSizer* grid = new wxGridSizer(4, 4, 5, 5);
 
         wxString buttons[16] = 
@@ -30,6 +31,7 @@ public:
 
         wxBoxSizer* vbox = new wxBoxSizer(wxVERTICAL);
         vbox->Add(display, 0, wxEXPAND | wxALL, 10);
+        vbox->Add(topBottom,0,wxEXPAND | wxALL, 10);
         vbox->Add(grid, 1, wxEXPAND | wxALL, 10);
 
         panel->SetSizer(vbox);
@@ -51,6 +53,17 @@ private:
             display->Clear();
         } else if(value == "=") {
             Calculate();
+        }
+        else if(value =="Delete")
+        {
+            wxString value = display->GetValue();
+            if (!value.IsEmpty())
+            {   
+                value.RemoveLast();
+                display->SetValue(value);
+
+            }
+        
         } else {
             display->AppendText(value);
         }
@@ -78,9 +91,11 @@ private:
                     double num;
                     currentNumber.ToDouble(&num);
                     numbers.push_back(num); 
+                    // new line here .
+                    operators.push_back(c);     
+                    currentNumber = "";     
                 }
-                operators.push_back(c);     
-                currentNumber = "";        
+                   
             }
         }
         
@@ -115,9 +130,14 @@ private:
                 }
             }
         }
-
-       
+        if (int (result) == result)
+        {
+            display->SetValue(wxString::Format("%d", (int)result));
+        }
+        else
+       {
         display->SetValue(wxString::Format("%.2f", result));
+       }
     }
 };
 
