@@ -11,8 +11,15 @@ public:
         display = new wxTextCtrl(panel, wxID_ANY, "",
                                  wxPoint(10,10), wxSize(260,40),
                                  wxTE_RIGHT);
+        wxGridSizer* top_grid = new wxGridSizer(1,2,5,5);
         wxButton* topBottom = new wxButton(panel, 1100, "Delete");
+        top_grid->Add(topBottom, 1, wxEXPAND);
         Bind(wxEVT_BUTTON, &Calculator::OnButtonClicked, this, 1100);
+        
+        wxButton* clear = new wxButton(panel, 1101, "Clear");
+        top_grid->Add(clear, 1, wxEXPAND);
+        Bind(wxEVT_BUTTON, &Calculator::OnButtonClicked, this, 1101);
+
         wxGridSizer* grid = new wxGridSizer(4, 4, 5, 5);
 
         wxString buttons[16] = 
@@ -20,7 +27,7 @@ public:
             "7","8","9","/",
             "4","5","6","*",
             "1","2","3","-",
-            "0","C","=","+"
+            "0",".","=","+"
         };
 
         for(int i = 0; i < 16; i++) 
@@ -32,7 +39,8 @@ public:
 
         wxBoxSizer* vbox = new wxBoxSizer(wxVERTICAL);
         vbox->Add(display, 0, wxEXPAND | wxALL, 10);
-        vbox->Add(topBottom,0,wxEXPAND | wxALL, 10);
+        vbox->Add(top_grid,0,wxEXPAND | wxALL, 10);
+
         vbox->Add(grid, 1, wxEXPAND | wxALL, 10);
 
         panel->SetSizer(vbox);
@@ -46,11 +54,11 @@ private:
         wxButton* btn = (wxButton*)event.GetEventObject();
         wxString value = btn->GetLabel();
         
-        if (display->GetValue() == "Error") {
+        if (display->GetValue() == "Math Error") {
             display->Clear();
         }   
 
-        if(value == "C") {
+        if(value == "Clear") {
             display->Clear();
         } else if(value == "=") {
             Calculate();
@@ -66,7 +74,7 @@ private:
             }
         
         }
-        else if(value == "+" || value == "-" || value == "*" || value == "/")
+        else if(value == "+" || value == "-" || value == "*" || value == "/" || value == ".")
         {
             wxString text = display->GetValue();
 
@@ -74,7 +82,7 @@ private:
 
             wxChar last = text.Last();
 
-            if (last == '+' || last == '-' || last == '*' || last == '/')
+            if (last == '+' || last == '-' || last == '*' || last == '/' || last == '.')
                 return;
 
             display->AppendText(value);
@@ -142,7 +150,7 @@ private:
 
                 if (operators[i]=='/' && b==0)
                 {
-                    display->SetValue("Error");
+                    display->SetValue("Math Error");
                     return;
                 }
 
